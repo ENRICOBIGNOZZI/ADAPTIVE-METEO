@@ -54,7 +54,7 @@ df= pd.DataFrame()
 # Definisci il parser degli argomenti
 parser = argparse.ArgumentParser(description='Graph')
 parser.add_argument('--input_file', type=str, help='Percorso del file CSV di input')
-parser.add_argument('--int_value', type=int, help='Un valore intero')
+parser.add_argument('--int_value', type=int, help='Step Previsione')
 
 # Effettua il parsing degli argomenti dalla riga di comando
 args = parser.parse_args()
@@ -76,7 +76,7 @@ else:
         print('Devi specificare un percorso per il file CSV.')
 
 # Chiedi all'utente di inserire il valore intero dopo aver letto il file CSV
-int_value = input('Inserisci un valore intero: ')
+int_value = input('Inserisci il tempo di previsione: ')
 
 try:
     time_step = int(int_value)
