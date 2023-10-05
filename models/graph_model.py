@@ -52,8 +52,9 @@ def MSPE(pred, true):
 df= pd.DataFrame()
 
 # Definisci il parser degli argomenti
-parser = argparse.ArgumentParser(description='Descrizione del tuo script')
+parser = argparse.ArgumentParser(description='Graph')
 parser.add_argument('--input_file', type=str, help='Percorso del file CSV di input')
+parser.add_argument('--int_value', type=int, help='Un valore intero')
 
 # Effettua il parsing degli argomenti dalla riga di comando
 args = parser.parse_args()
@@ -66,13 +67,22 @@ if args.input_file:
 else:
     # Altrimenti, chiedi all'utente di inserire il percorso del file CSV
     input_file = input('Inserisci il percorso del file CSV: ')
-
+    
     if input_file:
         df = pd.read_csv(input_file)
         # Ora df contiene i dati dal file CSV
         print(df)
     else:
         print('Devi specificare un percorso per il file CSV.')
+
+# Chiedi all'utente di inserire il valore intero dopo aver letto il file CSV
+int_value = input('Inserisci un valore intero: ')
+
+try:
+    time_step = int(int_value)
+    print(f'Il valore intero specificato è: {int_value}')
+except ValueError:
+    print('Il valore inserito non è un intero valido.')
 
 
 df['DATE'] = pd.to_datetime(df['DATE'])
@@ -316,7 +326,7 @@ class DNNModel(object):
     def __init__(self,batch_size,seq_len,hidden,lr,epochs_early_stopping=20):
 
         self.batch_size=batch_size
-        self.pred_len=6
+        self.pred_len=6*time_step
         self.seq_len=seq_len
         self.n_features=3
         self.n_nodes = 5
