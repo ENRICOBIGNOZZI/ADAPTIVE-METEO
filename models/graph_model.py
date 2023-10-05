@@ -546,7 +546,7 @@ def _hyperopt_objective(hyperparameters, trials, trials_file_path, max_evals):  
                           lr=(hyperparameters['lr']),
                           )
 
-    forecaster.train(setting).to("cuda")
+    forecaster.train(setting).to("cpu")
     Yp_mean ,Y_test= forecaster.vali_test(setting,test=True)
     Y_test = Dataset(flag='test',size=[1,1,1]).inverse_transform(Y_test.reshape(-1, Y_test.shape[-1])).flatten()
     Yp_mean = Dataset(flag='test',size=[1,1,1]).inverse_transform(Yp_mean.reshape(-1, Yp_mean.shape[-1])).flatten()
