@@ -4,7 +4,7 @@
 Original file is located at
     https://colab.research.google.com/drive/1X2gVRihdkjO2MgDg_DfVeRvohzL7k1Qx
 """
-
+import warnings
 import numpy as np
 from math import sqrt
 from torch.utils.data import DataLoader
@@ -29,6 +29,7 @@ from datetime import datetime, timedelta
 from torch.utils.data import Sampler
 import argparse
 
+warnings.filterwarnings("ignore")
 
 def MAE(pred, true):                                 #Metriche utili per la valutazione delle prestazioni
     return np.mean(np.abs(pred - true))
@@ -51,7 +52,7 @@ def MSPE(pred, true):
 
 df= pd.DataFrame()
 
-# Definisci il parser degli argomenti
+# Definisco il parser degli argomenti
 parser = argparse.ArgumentParser(description='Graph')
 parser.add_argument('--input_file', type=str, help='Percorso del file CSV di input')
 parser.add_argument('--int_value', type=int, help='Step Previsione')
@@ -80,7 +81,7 @@ int_value = input('Inserisci il tempo di previsione: ')
 
 try:
     time_step = int(int_value)
-    print(f'Il valore intero specificato è: {int_value}')
+    print(f'Il tempo di previsione specificato è: {int_value}')
 except ValueError:
     print('Il valore inserito non è un intero valido.')
 
@@ -89,7 +90,7 @@ df['DATE'] = pd.to_datetime(df['DATE'])
 
 df.columns
 
-col0=['DATE',
+col0=['DATE',                 #colonne del dataset
       'PRESS_STA0',
       'TEMP_STA0',
       'HUM_STA0',
@@ -220,7 +221,7 @@ class Dataset():
     def inverse_transform(self, data):                                    #Effettua lo scaling inverso dei dati nel caso si sia scelto di riscalarli nel preprocessing
         return self.scaler.inverse_transform(data)
 
-class Create_Mask(nn.Module):
+class Create_Mask(nn.Module):                             #crea la matrice di adiacenza del grafo 
     def __init__(self, n_nodes, seq_len):
         super(Create_Mask,self).__init__()
 
@@ -259,9 +260,9 @@ class Model(nn.Module):
 
     ):
         super(Model, self).__init__()
-        self.seq_len = seq_len
-        self.pred_len = pred_len
-        self.hidden = hidden
+        self.seq_len = seq_len                  #lunghezza sequenza utilizzata per la previsione 
+        self.pred_len = pred_len                #lunghezza sequenza da prevedere
+        self.hidden = hidden                    #layer intermedi grafo
         self.n_features = n_features
         self.batch_size = batch_size
         self.num_nodes=5
@@ -279,7 +280,7 @@ class Model(nn.Module):
     def forward(self, features, mask):
         A = mask
         features=features.reshape(self.batch_size,self.seq_len,self.num_nodes,self.n_features)
-        prodotto1=torch.matmul(A,features)
+        prodotto1=torch.matmul(A,features)                                                    #prodotto con matrice di adicenza, passa l'informazione solo ai nodi tra loro connessi.
         tutto = torch.einsum('ijkl,fklm->ijfm', prodotto1, self.W1)                           #Convoluzione
         conv1= torch.relu(tutto+self.bias)
         risultato = conv1
@@ -322,16 +323,16 @@ class EarlyStopping:
 
 
 
-class DNNModel(object):
+class DNNModel(object):                                                        #definiamo il modello per training, validation e test.
     def __init__(self,batch_size,seq_len,hidden,lr,epochs_early_stopping=20):
 
         self.batch_size=batch_size
-        self.pred_len=6*time_step
+        self.pred_len=6*time_step                   #[time_step]= [ora]
         self.seq_len=seq_len
         self.n_features=3
         self.n_nodes = 5
         self.hidden=hidden
-        self.train_epochs=2
+        self.train_epochs=100
         self.features='MS'
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.checkpoints='./checkpoints/'
@@ -520,10 +521,10 @@ class DNNModel(object):
 
 def _build_space():                                                              #Genera lo spazio di ricerca per ottimizzare gli iperaparametri
     space = {
-        'batch_size': 54, #hp.quniform('batch_size', 16, 256, 16),
-        'seq_len': 50, #hp.quniform('seq_len', 50, 250, 10),
-        'hidden': 24, #hp.quniform('hidden', 16, 64, 16),
-        'lr': 0.001 #hp.uniform('lr', 0.001, 0.005),
+        'batch_size': hp.quniform('batch_size', 16, 256, 16),
+        'seq_len': hp.quniform('seq_len', 50, 250, 10),
+        'hidden': hp.quniform('hidden', 16, 64, 16),
+        'lr': hp.uniform('lr', 0.001, 0.005),
         }
     return space
 
@@ -538,7 +539,7 @@ def _hyperopt_objective(hyperparameters, trials, trials_file_path, max_evals):  
     #max_evals: numero di valutazioni massimo della funzione di costo
 
     pc.dump(trials, open(trials_file_path, "wb"))
-    setting = '{}'.format('EMANUELE')
+    setting = '{}'.format('GRAPH')
     print(hyperparameters)
     forecaster = DNNModel(batch_size=int(hyperparameters['batch_size']),
                           seq_len=int(hyperparameters['seq_len']),
@@ -567,7 +568,7 @@ def _hyperopt_objective(hyperparameters, trials, trials_file_path, max_evals):  
         print("  MAE: {:.3f} | RMSE: {:.3f} %".format(MAEVal, sMAPEVal))
     return return_values
 
-def hyperparameter_optimizer(path_hyperparameters_folder=os.path.join('.', 'experimental_files'),
+def hyperparameter_optimizer(path_hyperparameters_folder=os.path.join('.', 'experimental_files'),    #fa l'ottimizzazione degli iperparametri 
                              new_hyperopt=1, max_evals=1500):
 
     if not os.path.exists(path_hyperparameters_folder):
@@ -584,10 +585,10 @@ def hyperparameter_optimizer(path_hyperparameters_folder=os.path.join('.', 'expe
                              max_evals=max_evals)
     fmin(fmin_objective, space=space, algo=tpe.suggest, max_evals=max_evals, trials=trials, verbose=False)      #fmin da hyperopt performa l'ottimizzazione utilizzando l'algoritmo Tree-structured Parzen Estimators
 
-import warnings
-warnings.filterwarnings("ignore")
-new_hyperopt = 1
-max_evals = 1
+
+
+new_hyperopt = 1   
+max_evals = 50      #massimo numero di tentativi per l'ottimizzazione 
 path_hyperparameters_folder = "./experimental_files/"
 hyperparameter_optimizer(path_hyperparameters_folder=path_hyperparameters_folder,new_hyperopt=new_hyperopt, max_evals=max_evals)
 
