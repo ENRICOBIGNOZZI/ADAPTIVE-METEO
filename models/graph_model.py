@@ -134,7 +134,7 @@ else:
           col0.extend([f'PRESS_STA{i}', f'HUM_STA{i}', f'TEMP_STA{i}',])
   col0.extend([f'PRESS_STA{numero_stazione}', f'HUM_STA{numero_stazione}', f'TEMP_STA{numero_stazione}'])
 
-    
+print("Colonne dataset:",col0)   
 
 df=df[col0]
 co = df.columns[1:]
