@@ -55,8 +55,8 @@ df= pd.DataFrame()
 # Definisco il parser degli argomenti
 parser = argparse.ArgumentParser(description='Graph')
 parser.add_argument('--input_file', type=str, help='Percorso del file CSV di input')
-parser.add_argument('--int_value', type=int, help='Step Previsione')
-parser.add_argument('--int_value', type=int, help='Stazione da prevedere:\n 0; \n 1; \n 2; \n 3; \n 4; \n' )
+parser.add_argument('--int_value1', type=int, help='Step Previsione')
+parser.add_argument('--int_value2', type=int, help='Stazione da prevedere:\n 0; \n 1; \n 2; \n 3; \n 4; \n' )
 parser.add_argument('--input_string', type=str, help='Variabile da prevedere:\n 1)TEMP \n 2)HUM')
 
 # Effettua il parsing degli argomenti dalla riga di comando
@@ -79,19 +79,19 @@ else:
         print('Devi specificare un percorso per il file CSV.')
 
 # Chiedi all'utente di inserire il valore intero dopo aver letto il file CSV
-int_value = input('Inserisci il tempo di previsione: \n 0; \n 1; \n 2; \n 3; \n 4; \n')
+int_value1 = input('Inserisci il tempo di previsione: ')
 
 try:
-    numero_stazione = int(int_value)
-    print(f'Il tempo di previsione specificato è: {int_value}')
+    time_step = int(int_value1)
+    print(f'Il tempo di previsione specificato è: {int_value1}')
 except ValueError:
     print('Il valore inserito non è un intero valido.')
 
-int_value = input('Inserisci numero stazione: ')
+int_value2 = input('Inserisci numero stazione: \n 0; \n 1; \n 2; \n 3; \n 4; \n')
 
 try:
-    time_step = int(int_value)
-    print(f'Il tempo di previsione specificato è: {int_value}')
+    numero_stazione = int(int_value2)
+    print(f'Il tempo di previsione specificato è: {int_value2}')
 except ValueError:
     print('Il valore inserito non è un intero valido.')
 
@@ -99,10 +99,14 @@ if args.input_string:
     variabile_da_prevedere= args.input_string
 else:
     # Altrimenti, chiedi all'utente di inserire la stringa da tastiera
-    variabile_da_prevedere = input('Variabile da prevedere:\n 1)TEMP \n 2)HUM ')
+    variabile_da_prevedere = input('Variabile da prevedere:\n 1)TEMP \n 2)HUM \n')
+
+# Verifica se la variabile da prevedere è 'HUM' o 'TEMP' e se il numero della stazione è valido
+if variabile_da_prevedere not in ['HUM', 'TEMP'] or numero_stazione not in ['0', '1', '2', '3', '4']:
+    print('Input non valido. Assicurati di inserire "HUM" o "TEMP" per la variabile e un numero tra 0 e 4 per la stazione.')
 
 # Ora puoi utilizzare la variabile input_string nel tuo codice
-print('Hai inserito la seguente stringa:', input_string)
+print('Hai inserito la seguente stringa:', variabile_da_prevedere)
 
 
 df['DATE'] = pd.to_datetime(df['DATE'])
@@ -115,12 +119,12 @@ if variabile_da_prevedere =="HUM":
   for i in range(5):
       if i != int(numero_stazione):
           col0.extend([f'PRESS_STA{i}', f'TEMP_STA{i}', f'HUM_STA{i}'])
-  col0.extend([f'PRESS_STA'+ numero_stazione ,f'TEMP_STA'+ numero_stazione, f'HUM_STA'+ numero_stazione])
+  col0.extend([f'PRESS_STA{numero_stazione}',f'TEMP_STA{numero_stazione}', f'HUM_STA{numero_stazione}'])
 else:
   for i in range(5):
       if i != int(numero_stazione):
           col0.extend([f'PRESS_STA{i}', f'HUM_STA{i}', f'TEMP_STA{i}',])
-  col0.extend([f'PRESS_STA'+ numero_stazione, f'HUM_STA'+ numero_stazione, f'TEMP_STA'+ numero_stazione])
+  col0.extend([f'PRESS_STA{numero_stazione}', f'HUM_STA{numero_stazione}', f'TEMP_STA{numero_stazione}'])
 
     
 
@@ -613,3 +617,4 @@ trials_file_path = os.path.join(path_hyperparameters_folder, trials_file_name)
 trials = pc.load(open(trials_file_path, "rb"))
 for trial in trials.trials:
     print(trial['result'])
+
