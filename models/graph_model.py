@@ -56,6 +56,8 @@ df= pd.DataFrame()
 parser = argparse.ArgumentParser(description='Graph')
 parser.add_argument('--input_file', type=str, help='Percorso del file CSV di input')
 parser.add_argument('--int_value', type=int, help='Step Previsione')
+parser.add_argument('--int_value', type=int, help='Stazione da prevedere:\n 0; \n 1; \n 2; \n 3; \n 4; \n' )
+parser.add_argument('--input_string', type=str, help='Variabile da prevedere:\n 1)TEMP \n 2)HUM')
 
 # Effettua il parsing degli argomenti dalla riga di comando
 args = parser.parse_args()
@@ -77,7 +79,15 @@ else:
         print('Devi specificare un percorso per il file CSV.')
 
 # Chiedi all'utente di inserire il valore intero dopo aver letto il file CSV
-int_value = input('Inserisci il tempo di previsione: ')
+int_value = input('Inserisci il tempo di previsione: \n 0; \n 1; \n 2; \n 3; \n 4; \n')
+
+try:
+    numero_stazione = int(int_value)
+    print(f'Il tempo di previsione specificato è: {int_value}')
+except ValueError:
+    print('Il valore inserito non è un intero valido.')
+
+int_value = input('Inserisci numero stazione: ')
 
 try:
     time_step = int(int_value)
@@ -85,28 +95,34 @@ try:
 except ValueError:
     print('Il valore inserito non è un intero valido.')
 
+if args.input_string:
+    variabile_da_prevedere= args.input_string
+else:
+    # Altrimenti, chiedi all'utente di inserire la stringa da tastiera
+    variabile_da_prevedere = input('Variabile da prevedere:\n 1)TEMP \n 2)HUM ')
+
+# Ora puoi utilizzare la variabile input_string nel tuo codice
+print('Hai inserito la seguente stringa:', input_string)
+
 
 df['DATE'] = pd.to_datetime(df['DATE'])
-
 df.columns
 
-col0=['DATE',                 #colonne del dataset
-      'PRESS_STA0',
-      'TEMP_STA0',
-      'HUM_STA0',
-      'PRESS_STA1',
-      'TEMP_STA1',
-      'HUM_STA1',
-      'PRESS_STA2',
-      'TEMP_STA2',
-      'HUM_STA2',
-      'PRESS_STA3',
-      'TEMP_STA3',
-      'HUM_STA3',
-      'PRESS_STA4',
-      'TEMP_STA4',
-      'HUM_STA4',
-      ]
+# Crea il vettore col0 in base alla variabile e al numero della stazione
+col0 = ['DATE']
+    
+if variabile_da_prevedere =="HUM":
+  for i in range(5):
+      if i != int(numero_stazione):
+          col0.extend([f'PRESS_STA{i}', f'TEMP_STA{i}', f'HUM_STA{i}'])
+  col0.extend([f'PRESS_STA'+ numero_stazione ,f'TEMP_STA'+ numero_stazione, f'HUM_STA'+ numero_stazione])
+else:
+  for i in range(5):
+      if i != int(numero_stazione):
+          col0.extend([f'PRESS_STA{i}', f'HUM_STA{i}', f'TEMP_STA{i}',])
+  col0.extend([f'PRESS_STA'+ numero_stazione, f'HUM_STA'+ numero_stazione, f'TEMP_STA'+ numero_stazione])
+
+    
 
 df=df[col0]
 co = df.columns[1:]
