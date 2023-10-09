@@ -4,6 +4,14 @@
 Original file is located at
     https://colab.research.google.com/drive/1X2gVRihdkjO2MgDg_DfVeRvohzL7k1Qx
 """
+_author_ = 'Enrico Bignozzi','Emanuele Antonelli', 'Raffaello Mastromarino', 'Niko Brimi'
+_credits_ = ["Enrico Bignozzi", "Emanuele Antonelli", "Raffaello Mastromarino", "Niko Brimi", "Paolo Scaccia", "Paolo Antonelli"]
+_license_ = "GPL"
+_version_ = "1.0"
+_maintainer_ = "Paolo Scaccia <paolo.scaccia@adaptivemeteo.com>", "Emanuele Antonelli <emaantonelli20@gmail.com>"
+_email_      = "paolo.scaccia@adaptivemeteo.com", "emaantonelli20@gmail.com"
+
+
 import warnings
 import numpy as np
 from math import sqrt
@@ -612,9 +620,10 @@ max_evals = 50      #massimo numero di tentativi per l'ottimizzazione
 path_hyperparameters_folder = "./experimental_files/"
 hyperparameter_optimizer(path_hyperparameters_folder=path_hyperparameters_folder,new_hyperopt=new_hyperopt, max_evals=max_evals)
 
-trials_file_name = 'DNN_hyperparameters'
-trials_file_path = os.path.join(path_hyperparameters_folder, trials_file_name)
-trials = pc.load(open(trials_file_path, "rb"))
-for trial in trials.trials:
-    print(trial['result'])
+if _name_ == "_main_":
+    trials_file_name = 'DNN_hyperparameters'
+    trials_file_path = os.path.join(path_hyperparameters_folder, trials_file_name)
+    trials = pc.load(open(trials_file_path, "rb"))
+    for trial in trials.trials:
+        print(trial['result'])
 
