@@ -124,21 +124,9 @@ import sys
 import csv
 
 # Check the number of arguments passed
-if len(sys.argv) != 2:
-    print("Usage: python script.py data.csv")
-else:
-    # Get the CSV file path from the command-line argument
-    csv_file = sys.argv[1]
 
-    try:
-        with open(csv_file, 'r') as file:
-            reader = csv.reader(file)
-            for row in reader:
-                # Process each row of the CSV file
-                print(row)
-    except FileNotFoundError:
-        print(f"File not found: {csv_file}")
 
+csv_file = sys.argv[1]
 len_to_predict = int(sys.argv[2])
 feature_to_predict = sys.argv[3]
 station_to_predict = sys.argv[4]
@@ -184,7 +172,7 @@ gs=[tr,va,te]                                                                   
 df=df[:-1]
 class Dataset():#'forecasting task, options:[M, S, MS]; M:multivariate predict multivariate, S:univariate predict univariate, MS:multivariate predict univariate')
     def __init__(self, root_path=None, flag='train', size=None,
-                 features='MS',target='target', scale=True, timeenc=0, freq='10m'):
+                 features='MS',target=last_column, scale=True, timeenc=0, freq='10m'):
 
         # size [seq_len, label_len, pred_len]
         # info sugli input
@@ -239,7 +227,7 @@ class Dataset():#'forecasting task, options:[M, S, MS]; M:multivariate predict m
             train_data = df_data.iloc[:stop_index + 1]
             self.scaler.fit(train_data.values)
             data = self.scaler.transform(df_data.values)
-            self.scaler.fit(train_data['TEMP_STA4'].values.reshape(-1, 1))#cosi' poi da andare a denormalizzare le previsioni
+            self.scaler.fit(train_data[self.target].values.reshape(-1, 1))#cosi' poi da andare a denormalizzare le previsioni
         else:
             data = df_data.values
         self.data_x = data[border1:border2]
@@ -363,12 +351,12 @@ class Model(nn.Module):#mettiamo insieme i pezzi per costruire il nostro modello
 
 
 class DNNModel(object):
-    def __init__(self,batch_size,seq_len,lstm_units,, len_to_predict, lr,nlayers,dropout,epochs_early_stopping=20):
+    def __init__(self,batch_size,seq_len,lstm_units,lr,nlayers, dropout, pred_len = len_to_predict, epochs_early_stopping=20):
         self.embed='fixed'
         self.batch_size=64#batch_size
         self.freq='10m'
         self.num_workers=0
-        self.pred_len=len_to_predict
+        self.pred_len=pred_len
         self.label_len=6
         self.seq_len=seq_len
         self.n_features=4
