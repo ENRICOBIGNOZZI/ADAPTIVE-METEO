@@ -779,7 +779,7 @@ class DNNModel(object):
         model = Model(pred_len=self.pred_len,seq_len=self.seq_len,label_len=self.label_len,d_model=self.d_model,
                       dropout=self.dropout,factor=self.factor,e_layers=self.e_layers,n_heads=self.n_heads,d_ff=self.d_ff,
                       p_hidden_dims=self.p_hidden_dims,p_hidden_layers=self.p_hidden_layers,d_layers=self.d_layers,
-                      output_attention=True).to("cuda")
+                      output_attention=True).to("cpu")
         return model
 
     def _select_optimizer(self):
@@ -1133,7 +1133,7 @@ def MAPE(pred, true):
 def MSPE(pred, true):
     return np.mean(np.square((pred - true) / true))
 
-if name=="__main__":
+if __name__ =="__main__":
     new_hyperopt = 1
     max_evals = 50
     path_hyperparameters_folder = "./experimental_files/"
