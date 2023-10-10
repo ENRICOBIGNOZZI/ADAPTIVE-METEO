@@ -67,6 +67,7 @@ parser.add_argument('--int_value1', type=int, help='Step Previsione')
 parser.add_argument('--int_value2', type=int, help='Stazione da prevedere:\n 0; \n 1; \n 2; \n 3; \n 4; \n' )
 parser.add_argument('--input_string', type=str, help='Variabile da prevedere:\n 1)TEMP \n 2)HUM')
 
+
 # Effettua il parsing degli argomenti dalla riga di comando
 args = parser.parse_args()
 
@@ -104,13 +105,13 @@ except ValueError:
     print('Il valore inserito non è un intero valido.')
 
 if args.input_string:
-    variabile_da_prevedere= args.input_string
+    variabile_da_prevedere = args.input_string
 else:
     # Altrimenti, chiedi all'utente di inserire la stringa da tastiera
     variabile_da_prevedere = input('Variabile da prevedere:\n 1)TEMP \n 2)HUM \n')
 
-# Verifica se la variabile da prevedere è 'HUM' o 'TEMP' e se il numero della stazione è valido
-if variabile_da_prevedere not in ['HUM', 'TEMP'] or numero_stazione not in ['0', '1', '2', '3', '4']:
+# Verifica se la variabile da prevedere è 'HUM' o 'TEMP' O 'PRESS' e se il numero della stazione è valido
+if variabile_da_prevedere not in ['HUM', 'TEMP', 'PRESS'] or numero_stazione not in ['0', '1', '2', '3', '4']:
     print('Input non valido. Assicurati di inserire "HUM" o "TEMP" per la variabile e un numero tra 0 e 4 per la stazione.')
 
 # Ora puoi utilizzare la variabile input_string nel tuo codice
@@ -184,7 +185,7 @@ class Dataset():
     # scale: se True si effettua lo scaling dei dati con lo Scaler, altrimenti False
 
     def __init__(self, root_path=None, flag='train', size=None,
-                 features='MS',target='HUM_STA4', scale=True):
+                 features='MS',target=col0[-1], scale=True):
 
         # size [seq_len, pred_len]
         # info
@@ -355,7 +356,7 @@ class DNNModel(object):                                                        #
     def __init__(self,batch_size,seq_len,hidden,lr,epochs_early_stopping=20):
 
         self.batch_size=batch_size
-        self.pred_len=6*time_step                   #[time_step]= [ora]
+        self.pred_len=time_step                   #[time_step]= [ora]
         self.seq_len=seq_len
         self.n_features=3
         self.n_nodes = 5
@@ -614,13 +615,11 @@ def hyperparameter_optimizer(path_hyperparameters_folder=os.path.join('.', 'expe
     fmin(fmin_objective, space=space, algo=tpe.suggest, max_evals=max_evals, trials=trials, verbose=False)      #fmin da hyperopt performa l'ottimizzazione utilizzando l'algoritmo Tree-structured Parzen Estimators
 
 
-
-new_hyperopt = 1   
-max_evals = 50      #massimo numero di tentativi per l'ottimizzazione 
-path_hyperparameters_folder = "./experimental_files/"
-hyperparameter_optimizer(path_hyperparameters_folder=path_hyperparameters_folder,new_hyperopt=new_hyperopt, max_evals=max_evals)
-
 if __name__ == "__main__":
+    new_hyperopt = 1   
+    max_evals = 50      #massimo numero di tentativi per l'ottimizzazione 
+    path_hyperparameters_folder = "./experimental_files/"
+    hyperparameter_optimizer(path_hyperparameters_folder=path_hyperparameters_folder,new_hyperopt=new_hyperopt, max_evals=max_evals)
     trials_file_name = 'DNN_hyperparameters'
     trials_file_path = os.path.join(path_hyperparameters_folder, trials_file_name)
     trials = pc.load(open(trials_file_path, "rb"))
