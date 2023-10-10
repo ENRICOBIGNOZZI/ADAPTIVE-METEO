@@ -110,16 +110,13 @@ else:
     # Altrimenti, chiedi all'utente di inserire la stringa da tastiera
     variabile_da_prevedere = input('Variabile da prevedere:\n 1)TEMP \n 2)HUM \n')
 
-# Verifica se la variabile da prevedere è 'HUM' o 'TEMP' O 'PRESS' e se il numero della stazione è valido
-if variabile_da_prevedere not in ['HUM', 'TEMP', 'PRESS'] or numero_stazione not in ['0', '1', '2', '3', '4']:
-    print('Input non valido. Assicurati di inserire "HUM" o "TEMP" per la variabile e un numero tra 0 e 4 per la stazione.')
 
 # Ora puoi utilizzare la variabile input_string nel tuo codice
 print('Hai inserito la seguente stringa:', variabile_da_prevedere)
 
 
 df['DATE'] = pd.to_datetime(df['DATE'])
-df.columns
+
 
 # Crea il vettore col0 in base alla variabile e al numero della stazione
 col0 = ['DATE']
@@ -140,7 +137,7 @@ print("Colonne dataset:",col0)
 df=df[col0]
 co = df.columns[1:]
 df = df.reset_index(drop=True)
-df
+
 
 desired_interval = 1008                                #Intervallo di tempo richiesto per cui le sequenze non presentino discontinuità
 df["DATE"]=pd.to_datetime(df["DATE"])
@@ -619,6 +616,7 @@ if __name__ == "__main__":
     new_hyperopt = 1   
     max_evals = 50      #massimo numero di tentativi per l'ottimizzazione 
     path_hyperparameters_folder = "./experimental_files/"
+    
     hyperparameter_optimizer(path_hyperparameters_folder=path_hyperparameters_folder,new_hyperopt=new_hyperopt, max_evals=max_evals)
     trials_file_name = 'DNN_hyperparameters'
     trials_file_path = os.path.join(path_hyperparameters_folder, trials_file_name)
