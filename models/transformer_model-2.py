@@ -142,6 +142,7 @@ else:
   col0.extend([f'PRESS_STA{numero_stazione}', f'HUM_STA{numero_stazione}', f'TEMP_STA{numero_stazione}'])
 
 print("Colonne dataset:",col0)
+last_column = col0[-1]
 df['DATE'] = pd.to_datetime(df['DATE'])
 df['hour']=df['DATE'].dt.hour
 df['month']=df.DATE.dt.month
@@ -181,7 +182,7 @@ df=df[:-1]           #Sistemo gli indici di partenza di vali perchè cosi vuole 
 
 class Dataset():#'forecasting task, options:[M, S, MS]; M:multivariate predict multivariate, S:univariate predict univariate, MS:multivariate predict univariate')
     def __init__(self, root_path=None, flag='train', size=None,
-                 features='MS',target= 'TEMP_STA2', scale=True, timeenc=0, freq='10m'):
+                 features='MS', target= last_column, scale=True, timeenc=0, freq='10m'):
         # info sugli input
         # size:lista contenente [seq_len, label_len, pred_len]
         # features: stringa che specifica il tipo di task di previsione
@@ -236,7 +237,7 @@ class Dataset():#'forecasting task, options:[M, S, MS]; M:multivariate predict m
             train_data = df_data.iloc[:stop_index + 1]
             self.scaler.fit(train_data.values)
             data = self.scaler.transform(df_data.values)
-            self.scaler.fit(train_data[col0[-1]].values.reshape(-1, 1))#cosi' poi da andare a denormalizzare le previsioni
+            self.scaler.fit(train_data[self.target].values.reshape(-1, 1))#cosi' poi da andare a denormalizzare le previsioni
 
         else:
             data = df_data.values
@@ -376,7 +377,7 @@ class DataEmbedding(nn.Module):#si sommano fra di loro tutti gli embedding
         return self.dropout(x)
 
 class TriangularCausalMask():#maschera il futuro
-    def __init__(self, B, L, device="cuda"):
+    def __init__(self, B, L, device="cpu"):
         mask_shape = [B, 1, L, L]
         with torch.no_grad():
             self._mask = torch.triu(torch.ones(mask_shape, dtype=torch.bool), diagonal=1).to(device)
@@ -385,7 +386,7 @@ class TriangularCausalMask():#maschera il futuro
         return self._mask
 
 class ProbMask():
-    def __init__(self, B, H, L, index, scores, device="cuda"):
+    def __init__(self, B, H, L, index, scores, device="cpu"):
         _mask = torch.ones(L, scores.shape[-1], dtype=torch.bool).to(device).triu(1)
         _mask_ex = _mask[None, None, :].expand(B, H, L, scores.shape[-1])
         indicator = _mask_ex[torch.arange(B)[:, None, None],
@@ -711,12 +712,12 @@ class Model(nn.Module): #si crea finalmente il modello
 
 
 class DNNModel(object):
-    def __init__(self,batch_size,seq_len,weight_decay,label_len,lr,d_model,dropout,factor,e_layers,n_heads,d_ff,p_hidden_dims,p_hidden_layers,d_layers, epochs_early_stopping=20):
+    def __init__(self,batch_size,seq_len,weight_decay,label_len,lr,d_model,dropout,factor,e_layers,n_heads,d_ff,p_hidden_dims,p_hidden_layers,d_layers, pred_len = timestep, epochs_early_stopping=20):
         self.embed='fixed'
         self.batch_size=batch_size
         self.freq='10m'
         self.num_workers=0
-        self.pred_len=time_step*6
+        self.pred_len=pred_len
         self.label_len=label_len
         self.seq_len=seq_len
         self.use_amp=False
