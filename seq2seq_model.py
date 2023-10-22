@@ -31,6 +31,8 @@ from datetime import datetime, timedelta
 from torch.utils.data import Sampler
 import sys
 import csv
+from torch.autograd import Variable
+device = ("cuda" if torch.cuda.is_available() else "cpu")
 
 _author_ = 'Enrico Bignozzi','Emanuele Antonelli', 'Raffaello Mastromarino', 'Niko Brimi'
 _credits_ = ["Enrico Bignozzi", "Emanuele Antonelli", "Raffaello Mastromarino", "Niko Brimi", "Paolo Scaccia", "Paolo Antonelli"]
@@ -253,8 +255,6 @@ class Dataset():#'forecasting task, options:[M, S, MS]; M:multivariate predict m
     def inverse_transform(self, data):# effettua lo scaling inverso dei dati nel caso si sia scelto di riscalarli nel preprocessing
         return self.scaler.inverse_transform(data)
 
-from torch.autograd import Variable
-device = ("cuda" if torch.cuda.is_available() else "cpu")
 class Encoder(nn.Module):
     def __init__(self, batch_size, seq_len, n_features, embedding_dim):
         super(Encoder, self).__init__()
