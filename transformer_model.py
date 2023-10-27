@@ -712,7 +712,7 @@ class Model(nn.Module): #si crea finalmente il modello
 
 
 class DNNModel(object):
-    def __init__(self,batch_size,seq_len,weight_decay,label_len,lr,d_model,dropout,factor,e_layers,n_heads,d_ff,p_hidden_dims,p_hidden_layers,d_layers, pred_len = timestep, epochs_early_stopping=20):
+    def __init__(self,batch_size,seq_len,weight_decay,label_len,lr,d_model,dropout,factor,e_layers,n_heads,d_ff,p_hidden_dims,p_hidden_layers,d_layers, pred_len = time_step, epochs_early_stopping=20):
         self.embed='fixed'
         self.batch_size=batch_size
         self.freq='10m'
