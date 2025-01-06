@@ -3,3 +3,5 @@
 Feature to predict name can change according to what dataframe is used
 2) Seq 2 Seq takes same inputs as LSTM.
 3) Transformer and GNN take inputs in a different order: 1) File of data, 2) Time in future to forecast (6 = 1 hour), Number of station, Feature to predict. In case some input is missing, the program will later ask to input it.
+![Probabilistic forecasting](forecasting.png)
+![Coverage vs Percentile](coverage.png)
